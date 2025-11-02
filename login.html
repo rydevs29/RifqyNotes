@@ -5,11 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login – RifqyNotes Premium</title>
   <meta name="theme-color" content="#00ff88">
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <script src="firebase-config.js"></script>
-
   <style>
     :root {
       --primary: #00ff88;
@@ -83,7 +78,6 @@
       text-decoration: none;
       font-weight: 600;
     }
-    .info a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -95,7 +89,6 @@
     <button onclick="login()">Masuk</button>
     <p class="error" id="error"></p>
 
-    <!-- TAMBAHAN INFO CREATE ACCOUNT -->
     <div class="info">
       <strong>Belum punya akun?</strong><br>
       Hubungi untuk membuat akun RifqyNotes Premium:<br>
@@ -109,27 +102,25 @@
       const password = document.getElementById('password').value;
       const errorEl = document.getElementById('error');
 
+      // Validasi input
       if (!email || !password) {
         errorEl.textContent = 'Email & password wajib diisi!';
         errorEl.style.display = 'block';
         return;
       }
 
+      // Simulasi login sukses (bisa diganti nanti dengan Firebase)
       errorEl.style.display = 'none';
-      auth.signInWithEmailAndPassword(email, password)
-        .then(() => {
-          window.location.href = 'index.html';
-        })
-        .catch(err => {
-          const msg = err.code === 'auth/wrong-password' ? 'Password salah!' :
-                     err.code === 'auth/user-not-found' ? 'Email tidak terdaftar!' :
-                     'Login gagal. Coba lagi!';
-          errorEl.textContent = msg;
-          errorEl.style.display = 'block';
-        });
+
+      // TAMBAHAN INI YANG PENTING!
+      localStorage.setItem('rifqyLogin', 'true');        // Set flag login
+      localStorage.setItem('rifqyUser', email);          // Simpan email (opsional)
+      
+      // Pindah ke index.html
+      window.location.href = 'index.html';
     }
 
-    // Enter key
+    // Enter = login
     document.addEventListener('keypress', e => {
       if (e.key === 'Enter') login();
     });
