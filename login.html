@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login – RifqyNotes Premium</title>
+  <meta name="theme-color" content="#00ff88">
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="firebase-config.js"></script>
+
+  <style>
+    :root {
+      --primary: #00ff88;
+      --bg: #0a0a1a;
+      --card: #1a1a2e;
+      --text: #ffffff;
+      --border: rgba(0, 255, 136, 0.4);
+      --accent: #00d4ff;
+    }
+    @media (prefers-color-scheme: light) {
+      :root { --bg: #f8f9fa; --card: #ffffff; --text: #212529; --border: rgba(0,255,136,0.6); }
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .login-card {
+      background: var(--card);
+      border-radius: 24px;
+      padding: 32px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+      text-align: center;
+    }
+    h1 { font-size: 28px; color: var(--primary); margin-bottom: 8px; }
+    p { opacity: 0.8; margin-bottom: 24px; font-size: 15px; }
+    input {
+      width: 100%;
+      padding: 16px;
+      margin: 12px 0;
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      background: rgba(0,0,0,0.1);
+      color: var(--text);
+      font-size: 16px;
+    }
+    button {
+      background: var(--primary);
+      color: #000;
+      border: none;
+      padding: 16px;
+      border-radius: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
+      margin-top: 12px;
+    }
+    button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,255,136,0.4); }
+    .error { color: #ff6b6b; margin-top: 12px; font-size: 14px; display: none; }
+    .info {
+      margin-top: 24px;
+      padding: 16px;
+      background: rgba(0,255,136,0.15);
+      border-radius: 16px;
+      border-left: 4px solid var(--primary);
+      font-size: 14px;
+      text-align: left;
+    }
+    .info a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .info a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <h1>RifqyNotes</h1>
+    <p>Fitur Premium – Login untuk lanjut</p>
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="login()">Masuk</button>
+    <p class="error" id="error"></p>
+
+    <!-- TAMBAHAN INFO CREATE ACCOUNT -->
+    <div class="info">
+      <strong>Belum punya akun?</strong><br>
+      Hubungi untuk membuat akun RifqyNotes Premium:<br>
+      <a href="https://wa.me/6287759652715" target="_blank">0877-5965-2715 (WhatsApp)</a>
+    </div>
+  </div>
+
+  <script>
+    function login() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const errorEl = document.getElementById('error');
+
+      if (!email || !password) {
+        errorEl.textContent = 'Email & password wajib diisi!';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      errorEl.style.display = 'none';
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+          window.location.href = 'index.html';
+        })
+        .catch(err => {
+          const msg = err.code === 'auth/wrong-password' ? 'Password salah!' :
+                     err.code === 'auth/user-not-found' ? 'Email tidak terdaftar!' :
+                     'Login gagal. Coba lagi!';
+          errorEl.textContent = msg;
+          errorEl.style.display = 'block';
+        });
+    }
+
+    // Enter key
+    document.addEventListener('keypress', e => {
+      if (e.key === 'Enter') login();
+    });
+  </script>
+</body>
+</html>
