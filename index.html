@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RifqyNotes</title>
+  <meta name="description" content="Catatan AI + Voice to Text – Bicara jadi teks, AI ringkas otomatis">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.png" type="image/png">
+  <meta name="theme-color" content="#00ff88">
+
+  <style>
+    :root {
+      --primary: #00ff88;
+      --bg: #0a0a1a;
+      --card: #1a1a2e;
+      --text: #ffffff;
+      --accent: #00d4ff;
+      --border: rgba(0, 255, 136, 0.4);
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f8f9fa;
+        --card: #ffffff;
+        --text: #212529;
+        --border: rgba(0, 255, 136, 0.6);
+      }
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 20px;
+      transition: all 0.3s;
+    }
+
+    .container { max-width: 600px; margin: 0 auto; }
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    h1 { font-size: 28px; color: var(--primary); margin-bottom: 8px; }
+    .subtitle { opacity: 0.8; font-size: 15px; }
+
+    .card {
+      background: var(--card);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+
+    .voice-controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      background: var(--primary);
+      color: #000;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 15px;
+      transition: all 0.2s;
+      flex: 1;
+      min-width: 120px;
+    }
+
+    button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,255,136,0.4); }
+    button.recording { background: #ff6b6b; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.1);
+      color: var(--text);
+    }
+
+    textarea {
+      width: 100%;
+      padding: 16px;
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      background: rgba(0,0,0,0.1);
+      color: var(--text);
+      font-size: 16px;
+      resize: vertical;
+      min-height: 120px;
+      margin-bottom: 16px;
+    }
+
+    .ai-summary {
+      background: rgba(0,255,136,0.15);
+      padding: 16px;
+      border-radius: 16px;
+      border-left: 4px solid var(--primary);
+      margin: 16px 0;
+      display: none;
+    }
+
+    .notes-list {
+      margin-top: 20px;
+    }
+
+    .note-item {
+      background: rgba(255,255,255,0.05);
+      padding: 16px;
+      border-radius: 16px;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      position: relative;
+    }
+
+    .note-date { font-size: 12px; opacity: 0.7; margin-bottom: 8px; }
+    .note-text { margin-bottom: 12px; word-break: break-word; }
+    .note-actions {
+      display: flex;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .note-actions button {
+      padding: 6px 12px;
+      font-size: 13px;
+      flex: 1;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      opacity: 0.6;
+      font-style: italic;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 32px;
+      font-size: 13px;
+      opacity: 0.7;
+    }
+
+    @media (max-width: 480px) {
+      .card { padding: 20px; }
+      h1 { font-size: 24px; }
+      .voice-controls { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>RifqyNotes</h1>
+      <p class="subtitle">Bicara → Catatan → AI Ringkas Otomatis</p>
+    </div>
+
+    <div class="card">
+      <div class="voice-controls">
+        <button id="record-btn" onclick="toggleRecord()">Rekam Suara</button>
+        <button class="btn-secondary" onclick="summarizeText()">AI Ringkas</button>
+        <button class="btn-secondary" onclick="saveNote()">Simpan</button>
+      </div>
+
+      <textarea id="note-input" placeholder="Ketik catatan atau hasil suara akan muncul di sini..."></textarea>
+
+      <div id="ai-summary" class="ai-summary">
+        <strong>AI Ringkasan:</strong><br>
+        <span id="summary-text"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-bottom: 16px; opacity: 0.9;">Catatan Tersimpan</h3>
+      <div id="notes-list">
+        <div class="empty-state">Belum ada catatan. Mulai rekam suara!</div>
+      </div>
+    </div>
+
+    <footer>© 2025 Rifqy Aditya | Open Source</footer>
+  </div>
+
+  <script>
+    // Speech Recognition
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = SpeechRecognition ? new SpeechRecognition() : null;
+    if (recognition) {
+      recognition.lang = 'id-ID';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+    }
+
+    let isRecording = false;
+    const recordBtn = document.getElementById('record-btn');
+
+    function toggleRecord() {
+      if (!recognition) {
+        alert('Browser tidak mendukung rekam suara. Gunakan Chrome/Edge.');
+        return;
+      }
+
+      if (isRecording) {
+        recognition.stop();
+        recordBtn.textContent = 'Rekam Suara';
+        recordBtn.classList.remove('recording');
+        isRecording = false;
+      } else {
+        recognition.start();
+        recordBtn.textContent = 'Berhenti';
+        recordBtn.classList.add('recording');
+        isRecording = true;
+      }
+    }
+
+    if (recognition) {
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        const input = document.getElementById('note-input');
+        input.value = (input.value + ' ' + transcript).trim();
+      };
+
+      recognition.onerror = () => {
+        alert('Error rekam suara. Coba lagi.');
+        recordBtn.textContent = 'Rekam Suara';
+        recordBtn.classList.remove('recording');
+        isRecording = false;
+      };
+
+      recognition.onend = () => {
+        if (isRecording) {
+          recordBtn.textContent = 'Rekam Suara';
+          recordBtn.classList.remove('recording');
+          isRecording = false;
+        }
+      };
+    }
+
+    // Simpan Catatan
+    function saveNote() {
+      const text = document.getElementById('note-input').value.trim();
+      if (!text) return alert('Catatan kosong!');
+
+      const notes = JSON.parse(localStorage.getItem('rifqyNotes') || '[]');
+      const note = {
+        id: Date.now(),
+        text: text,
+        date: new Date().toLocaleString('id-ID'),
+        summary: document.getElementById('summary-text').textContent || ''
+      };
+      notes.unshift(note);
+      localStorage.setItem('rifqyNotes', JSON.stringify(notes));
+
+      document.getElementById('note-input').value = '';
+      document.getElementById('ai-summary').style.display = 'none';
+      loadNotes();
+      alert('Catatan tersimpan!');
+    }
+
+    // AI Ringkas (Sederhana)
+    function summarizeText() {
+      const text = document.getElementById('note-input').value.trim();
+      if (!text) return alert('Tidak ada teks untuk diringkas!');
+
+      // AI sederhana: ambil kalimat pendek
+      const sentences = text.split(/[.!?]/).filter(s => s.trim().length > 10);
+      const summary = sentences.slice(0, 2).join('. ') + (sentences.length > 2 ? '...' : '.');
+
+      document.getElementById('summary-text').textContent = summary;
+      document.getElementById('ai-summary').style.display = 'block';
+    }
+
+    // Load Catatan
+    function loadNotes() {
+      const notes = JSON.parse(localStorage.getItem('rifqyNotes') || '[]');
+      const list = document.getElementById('notes-list');
+      
+      if (notes.length === 0) {
+        list.innerHTML = '<div class="empty-state">Belum ada catatan. Mulai rekam suara!</div>';
+        return;
+      }
+
+      list.innerHTML = '';
+      notes.forEach(note => {
+        const div = document.createElement('div');
+        div.className = 'note-item';
+        div.innerHTML = `
+          <div class="note-date">${note.date}</div>
+          <div class="note-text">${note.text}</div>
+          ${note.summary ? `<div style="font-size:13px; opacity:0.8; margin:8px 0;"><strong>AI:</strong> ${note.summary}</div>` : ''}
+          <div class="note-actions">
+            <button onclick="copyNote(${note.id})">Salin</button>
+            <button class="btn-secondary" onclick="deleteNote(${note.id})">Hapus</button>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    function copyNote(id) {
+      const notes = JSON.parse(localStorage.getItem('rifqyNotes') || '[]');
+      const note = notes.find(n => n.id === id);
+      if (note) {
+        navigator.clipboard.writeText(note.text);
+        alert('Disalin ke clipboard!');
+      }
+    }
+
+    function deleteNote(id) {
+      if (!confirm('Hapus catatan ini?')) return;
+      let notes = JSON.parse(localStorage.getItem('rifqyNotes') || '[]');
+      notes = notes.filter(n => n.id !== id);
+      localStorage.setItem('rifqyNotes', JSON.stringify(notes));
+      loadNotes();
+    }
+
+    // Init
+    window.onload = loadNotes;
+  </script>
+</body>
+</html>
