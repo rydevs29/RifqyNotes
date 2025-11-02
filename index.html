@@ -4,176 +4,58 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RifqyNotes Premium</title>
-  <meta name="description" content="Catatan AI + Voice to Text – Offline">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon.png" type="image/png">
   <meta name="theme-color" content="#00ff88">
-
   <style>
     :root {
       --primary: #00ff88;
       --bg: #0a0a1a;
       --card: #1a1a2e;
       --text: #ffffff;
-      --accent: #00d4ff;
       --border: rgba(0, 255, 136, 0.4);
       --logout-bg: rgba(255, 107, 107, 0.2);
       --logout-text: #ff6b6b;
     }
     @media (prefers-color-scheme: light) {
-      :root { 
-        --bg: #f8f9fa; 
-        --card: #ffffff; 
-        --text: #212529; 
-        --border: rgba(0,255,136,0.6);
-        --logout-bg: rgba(255, 107, 107, 0.15);
-        --logout-text: #e03131;
-      }
+      :root { --bg: #f8f9fa; --card: #ffffff; --text: #212529; --border: rgba(0,255,136,0.6); --logout-bg: rgba(255,107,107,0.15); --logout-text: #e03131; }
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      padding: 20px;
-      transition: all 0.3s;
-    }
+    body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 20px; }
     .container { max-width: 600px; margin: 0 auto; position: relative; }
-
-    /* TOMBOL LOGOUT – POJOK KANAN ATAS */
     .logout-btn {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      background: var(--logout-bg);
-      color: var(--logout-text);
-      border: 1.5px solid var(--logout-text);
-      padding: 8px 16px;
-      border-radius: 12px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      z-index: 10;
+      position: absolute; top: 16px; right: 16px; background: var(--logout-bg); color: var(--logout-text);
+      border: 1.5px solid var(--logout-text); padding: 8px 16px; border-radius: 12px; font-size: 13px;
+      font-weight: 600; cursor: pointer; transition: all 0.2s; z-index: 10;
     }
-    .logout-btn:hover {
-      background: var(--logout-text);
-      color: white;
-      transform: translateY(-1px);
-    }
-
+    .logout-btn:hover { background: var(--logout-text); color: white; transform: translateY(-1px); }
     .header { text-align: center; margin-bottom: 24px; padding-top: 50px; }
     h1 { font-size: 28px; color: var(--primary); margin-bottom: 8px; }
     .subtitle { opacity: 0.8; font-size: 15px; }
-
-    .card {
-      background: var(--card);
-      border-radius:  1px solid var(--border);
-      border-radius: 24px;
-      padding: 24px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-      margin-bottom: 20px;
-    }
-
-    .voice-controls { 
-      display: flex; 
-      gap: 12px; 
-      margin-bottom: 20px; 
-      flex-wrap: wrap; 
-      align-items: center;
-    }
-    button {
-      background: var(--primary);
-      color: #000;
-      border: none;
-      padding: 14px 20px;
-      border-radius: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      font-size: 15px;
-      transition: all 0.2s;
-      flex: 1;
-      min-width: 120px;
-    }
-    button:hover { 
-      transform: translateY(-2px); 
-      box-shadow: 0 6px 20px rgba(0,255,136,0.4); 
-    }
-    button.recording { 
-      background: #ff6b6b; 
-      animation: pulse 1.5s infinite;
-    }
+    .card { background: var(--card); border-radius: 24px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 1px solid var(--border); margin-bottom: 20px; }
+    .voice-controls { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+    button { background: var(--primary); color: #000; border: none; padding: 14px 20px; border-radius: 16px; font-weight: 600; cursor: pointer; font-size: 15px; transition: all 0.2s; flex: 1; min-width: 120px; }
+    button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,255,136,0.4); }
+    button.recording { background: #ff6b6b; animation: pulse 1.5s infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
-    .btn-secondary { 
-      background: rgba(255,255,255,0.1); 
-      color: var(--text); 
-    }
-
-    .timer {
-      font-family: 'Courier New', monospace;
-      font-size: 18px;
-      font-weight: bold;
-      color: var(--primary);
-      text-align: center;
-      margin: 12px 0;
-      padding: 8px;
-      background: rgba(0,255,136,0.1);
-      border-radius: 12px;
-      display: none;
-    }
-
-    textarea {
-      width: 100%;
-      padding: 16px;
-      border: 2px solid var(--border);
-      border-radius: 16px;
-      background: rgba(0,0,0,0.1);
-      color: var(--text);
-      font-size: 16px;
-      resize: vertical;
-      min-height: 120px;
-      margin-bottom: 16px;
-    }
-
-    .ai-summary {
-      background: rgba(0,255,136,0.15);
-      padding: 16px;
-      border-radius: 16px;
-      border-left: 4px solid var(--primary);
-      margin: 16px 0;
-      display: none;
-    }
-
+    .btn-secondary { background: rgba(255,255,255,0.1); color: var(--text); }
+    .timer { font-family: 'Courier New', monospace; font-size: 18px; font-weight: bold; color: var(--primary); text-align: center; margin: 12px 0; padding: 8px; background: rgba(0,255,136,0.1); border-radius: 12px; display: none; }
+    textarea { width: 100%; padding: 16px; border: 2px solid var(--border); border-radius: 16px; background: rgba(0,0,0,0.1); color: var(--text); font-size: 16px; resize: vertical; min-height: 120px; margin-bottom: 16px; }
+    .ai-summary { background: rgba(0,255,136,0.15); padding: 16px; border-radius: 16px; border-left: 4px solid var(--primary); margin: 16px 0; display: none; }
     .notes-list { margin-top: 20px; }
-    .note-item {
-      background: rgba(255,255,255,0.05);
-      padding: 16px;
-      border-radius: 16px;
-      margin-bottom: 12px;
-      border: 1px solid var(--border);
-    }
+    .note-item { background: rgba(255,255,255,0.05); padding: 16px; border-radius: 16px; margin-bottom: 12px; border: 1px solid var(--border); }
     .note-date { font-size: 12px; opacity: 0.7; margin-bottom: 8px; }
     .note-text { margin-bottom: 12px; word-break: break-word; }
     .note-actions { display: flex; gap: 8px; font-size: 13px; }
     .note-actions button { padding: 6px 12px; font-size: 13px; flex: 1; }
     .empty-state { text-align: center; padding: 40px 20px; opacity: 0.6; font-style: italic; }
-
     footer { text-align: center; margin-top: 32px; font-size: 13px; opacity: 0.7; }
-
-    @media (max-width: 480px) {
-      .card { padding: 20px; }
-      h1 { font-size: 24px; }
-      .voice-controls { flex-direction: column; }
-      .logout-btn { top: 12px; right: 12px; font-size: 12px; padding: 6px 12px; }
-    }
+    @media (max-width: 480px) { .card { padding: 20px; } h1 { font-size: 24px; } .voice-controls { flex-direction: column; } .logout-btn { top: 12px; right: 12px; font-size: 12px; padding: 6px 12px; } }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- TOMBOL LOGOUT SUDAH ADA -->
     <button class="logout-btn" onclick="logout()">Logout</button>
-
     <div class="header">
       <h1>RifqyNotes</h1>
       <p class="subtitle">Premium – Rekam 90 Menit + Timer</p>
@@ -185,12 +67,8 @@
         <button class="btn-secondary" onclick="summarizeText()">AI Ringkas</button>
         <button class="btn-secondary" onclick="saveNote()">Simpan</button>
       </div>
-
-      <!-- TIMER -->
       <div id="timer" class="timer">00:00:00</div>
-
       <textarea id="note-input" placeholder="Hasil suara akan muncul di sini..."></textarea>
-
       <div id="ai-summary" class="ai-summary">
         <strong>AI Ringkasan:</strong><br>
         <span id="summary-text"></span>
@@ -208,45 +86,32 @@
   </div>
 
   <script>
-    // === LOGOUT FUNCTION ===
+    // CEK LOGIN LANGSUNG (SYNC) – BUKAN window.onload!
+    if (!localStorage.getItem('rifqyLogin')) {
+      window.location.href = 'login.html';
+    } else {
+      loadNotes(); // langsung load catatan
+    }
+
+    // LOGOUT
     function logout() {
       if (confirm('Yakin ingin keluar?')) {
-        // Hapus status login sederhana (opsional)
         localStorage.removeItem('rifqyLogin');
+        localStorage.removeItem('rifqyUser');
         window.location.href = 'login.html';
       }
     }
 
-    // === CEK LOGIN SEDERHANA (opsional) ===
-    window.onload = function() {
-      if (!localStorage.getItem('rifqyLogin')) {
-        window.location.href = 'login.html';
-      } else {
-        loadNotes();
-      }
-    };
-
-    // === SPEECH + AUTO RESTART + TIMER ===
+    // SPEECH + AUTO RESTART + TIMER
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = SpeechRecognition ? new SpeechRecognition() : null;
-    if (!recognition) {
-      alert('Browser tidak mendukung rekam suara. Gunakan Chrome/Edge.');
-    } else {
-      recognition.lang = 'id-ID';
-      recognition.continuous = true;
-      recognition.interimResults = true;
-    }
+    if (!recognition) alert('Browser tidak mendukung rekam suara.');
 
-    let isRecording = false;
-    let startTime;
-    let timerInterval;
-    let finalTranscript = '';
-    const recordBtn = document.getElementById('record-btn');
-    const timerEl = document.getElementById('timer');
+    let isRecording = false, startTime, timerInterval, finalTranscript = '';
+    const recordBtn = document.getElementById('record-btn'), timerEl = document.getElementById('timer');
 
     function toggleRecord() {
       if (!recognition) return;
-
       if (isRecording) {
         recognition.stop();
         clearInterval(timerInterval);
@@ -262,7 +127,6 @@
         recordBtn.classList.add('recording');
         timerEl.style.display = 'block';
         isRecording = true;
-
         timerInterval = setInterval(() => {
           const elapsed = Math.floor((Date.now() - startTime) / 1000);
           const h = String(Math.floor(elapsed / 3600)).padStart(2, '0');
@@ -274,34 +138,20 @@
     }
 
     if (recognition) {
-      recognition.onresult = (event) => {
+      recognition.lang = 'id-ID'; recognition.continuous = true; recognition.interimResults = true;
+      recognition.onresult = e => {
         let interim = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const t = event.results[i][0].transcript;
-          if (event.results[i].isFinal) {
-            finalTranscript += t + ' ';
-          } else {
-            interim += t;
-          }
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          const t = e.results[i][0].transcript;
+          if (e.results[i].isFinal) finalTranscript += t + ' ';
+          else interim += t;
         }
         document.getElementById('note-input').value = finalTranscript + interim;
       };
-
-      recognition.onerror = () => {
-        alert('Error mikrofon. Coba lagi.');
-        toggleRecord();
-      };
-
-      recognition.onend = () => {
-        if (isRecording) {
-          setTimeout(() => {
-            if (isRecording) recognition.start();
-          }, 100);
-        }
-      };
+      recognition.onerror = () => { alert('Error mikrofon.'); toggleRecord(); };
+      recognition.onend = () => { if (isRecording) setTimeout(() => recognition.start(), 100); };
     }
 
-    // === AI RINGKAS ===
     function summarizeText() {
       const text = document.getElementById('note-input').value.trim();
       if (!text) return alert('Teks kosong!');
@@ -311,24 +161,14 @@
       document.getElementById('ai-summary').style.display = 'block';
     }
 
-    // === SIMPAN KE LOCAL STORAGE ===
     function saveNote() {
       const text = document.getElementById('note-input').value.trim();
       if (!text) return alert('Catatan kosong!');
-
       const duration = isRecording ? timerEl.textContent : 'Selesai';
-      const note = {
-        id: Date.now(),
-        text: text,
-        date: new Date().toLocaleString('id-ID'),
-        summary: document.getElementById('summary-text').textContent || '',
-        duration: duration
-      };
-
+      const note = { id: Date.now(), text, date: new Date().toLocaleString('id-ID'), summary: document.getElementById('summary-text').textContent || '', duration };
       const notes = JSON.parse(localStorage.getItem('rifqyNotes') || '[]');
       notes.unshift(note);
       localStorage.setItem('rifqyNotes', JSON.stringify(notes));
-
       document.getElementById('note-input').value = '';
       document.getElementById('ai-summary').style.display = 'none';
       finalTranscript = '';
@@ -336,20 +176,13 @@
       alert('Catatan tersimpan offline!');
     }
 
-    // === LOAD CATATAN ===
     function loadNotes() {
       const notes = JSON.parse(localStorage.getItem('rifqyNotes') || '[]');
       const list = document.getElementById('notes-list');
-
-      if (notes.length === 0) {
-        list.innerHTML = '<div class="empty-state">Belum ada catatan. Mulai rekam!</div>';
-        return;
-      }
-
+      if (notes.length === 0) { list.innerHTML = '<div class="empty-state">Belum ada catatan.</div>'; return; }
       list.innerHTML = '';
       notes.forEach(note => {
-        const div = document.createElement('div');
-        div.className = 'note-item';
+        const div = document.createElement('div'); div.className = 'note-item';
         div.innerHTML = `
           <div class="note-date">${note.date} (${note.duration})</div>
           <div class="note-text">${note.text}</div>
@@ -357,22 +190,19 @@
           <div class="note-actions">
             <button onclick="copyNote('${note.text.replace(/'/g, "\\'")}')">Salin</button>
             <button class="btn-secondary" onclick="deleteNote(${note.id})">Hapus</button>
-          </div>
-        `;
+          </div>`;
         list.appendChild(div);
       });
     }
 
-    function copyNote(text) {
-      navigator.clipboard.writeText(text).then(() => alert('Disalin!'));
-    }
-
-    function deleteNote(id) {
-      if (!confirm('Hapus catatan?')) return;
-      let notes = JSON.parse(localStorage.getItem('rifqyNotes') || '[]');
-      notes = notes.filter(n => n.id !== id);
-      localStorage.setItem('rifqyNotes', JSON.stringify(notes));
-      loadNotes();
+    function copyNote(text) { navigator.clipboard.writeText(text).then(() => alert('Disalin!')); }
+    function deleteNote(id) { 
+      if (confirm('Hapus?')) { 
+        let notes = JSON.parse(localStorage.getItem('rifqyNotes') || '[]'); 
+        notes = notes.filter(n => n.id !== id); 
+        localStorage.setItem('rifqyNotes', JSON.stringify(notes)); 
+        loadNotes(); 
+      } 
     }
   </script>
 </body>
